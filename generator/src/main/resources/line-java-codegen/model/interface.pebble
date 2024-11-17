@@ -1,0 +1,37 @@
+{# @pebvariable name="model" type="org.openapitools.codegen.CodegenModel" -#}
+/**
+ * {{ model.description | escape }}{% if model.description == "" or model.description == null %}{{model.classname}}{% endif %}{% if model.isDeprecated %}
+ * @deprecated{% endif %}
+ */
+{%- if model.isDeprecated -%}
+@Deprecated
+{% endif %}
+@JsonSubTypes({
+{% for mm in model.discriminator.mappedModels %}        @JsonSubTypes.Type(value = {{mm.modelName}}.class, name = "{{mm.mappingName}}"),
+{% endfor %}
+})
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "{{model.discriminator.propertyName}}",
+    {# Unknown{{className}} is not auto-generated, so the defaultImpl for newly added classes needs to be disabled. #}
+    {% if ["Event", "MessageContent", "Message", "Action", "DemographicFilter", "FlexBoxBackground", "FlexComponent",
+       "FlexContainer", "ImagemapAction", "Mentionee", "ModuleContent", "Recipient", "RichMenuBatchOperation",
+       "Source", "Template", "ThingsContent"] contains model.classname %}
+    defaultImpl = Unknown{{model.classname}}.class,
+    {% endif %}
+    visible = true
+)
+public interface {{model.classname}} {
+{% for var in model.vars -%}
+{% if model.discriminator.propertyName != var.name %}
+    {% if var.description -%}
+    /**
+     * {{ var.description | escape }}
+     */
+    {% endif %}
+    {{ var.dataType }} {{ var.name }}();
+{% endif %}
+{% endfor -%}
+{% if ["Source"] contains model.classname %}{% include "../body/model/" + model.classname + ".java" %}{% endif %}
+}
