@@ -51,7 +51,7 @@ public class EchoApplication {
         log.info("event: " + event);
         if (event.message() instanceof TextMessageContent) {
             TextMessageContent message = (TextMessageContent) event.message();
-            final String originalMessageText = message.text();
+            final String originalMessageText = "测试成功。";
             messagingApiClient.replyMessage(new ReplyMessageRequest(
                     event.replyToken(),
                     List.of(new TextMessage(originalMessageText)),
